@@ -1,0 +1,13 @@
+Spring:
+  dataSource:
+    url: jdbc:mysql://localhost:3306/database?autoReconnect=true&useUnicode=true&characterEncoding=utf8&serverTimezone=UTC
+    username: root
+    password: zl202897mq
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+#server:
+#  port:8181

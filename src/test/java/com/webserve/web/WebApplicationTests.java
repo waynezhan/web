@@ -20,8 +20,7 @@ class WebApplicationTests {
 
     @Test
     public void contextLoads() throws SQLException {
-        System.out.println("1233");
-        System.out.println(dataSource.getClass());
+          System.out.println(dataSource.getClass());
 
         Connection connection = dataSource.getConnection();
         System.out.println(connection);

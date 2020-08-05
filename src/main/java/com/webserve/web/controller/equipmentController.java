@@ -14,7 +14,7 @@ public class equipmentController {
 
     @GetMapping("/equipid/{id}")
     public equipment getEquipment(@PathVariable("id") String id){
-        System.out.println(123);
+        System.out.println(id);
         return equipmentMapper.getEquipById(id);
 
     }

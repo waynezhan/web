@@ -1,5 +1,7 @@
 package com.webserve.web;
 
+import com.webserve.web.bean.user;
+import com.webserve.web.controller.userController;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,9 @@ class WebApplicationTests {
     @Autowired
     DataSource dataSource;
 
+    @Autowired
+    private userController usercontroller;
+
 
     @Test
     public void contextLoads() throws SQLException {
@@ -25,6 +30,13 @@ class WebApplicationTests {
         Connection connection = dataSource.getConnection();
         System.out.println(connection);
         connection.close();
+    }
+    @Test
+    public void sqlTest(){
+
+
+        user user = usercontroller.getUserByUsername("但丁");
+        System.out.println(user.getUsername());
     }
 
 }

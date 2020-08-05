@@ -1,17 +1,19 @@
 package com.webserve.web.bean;
 
-public class user {
-    private Integer id;
+import java.io.Serializable;
+
+public class user implements Serializable {
+    private Integer userid;
     private String username;
     private String password;
     private String equipId;
 
-    public Integer getId() {
-        return id;
+    public Integer getUserid() {
+        return userid;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setUserid(Integer userid) {
+        this.userid = userid;
     }
 
     public String getUsername() {

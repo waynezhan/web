@@ -6,4 +6,17 @@
     <select id="getUserById" resultType="com.webserve.web.bean.user">
         select * from user where userid=#{id}
     </select>
+
+    <select id="getAllUser" resultType="com.webserve.web.bean.user">
+        SELECT * FROM  user
+    </select>
+    <insert id="createUser" parameterType="com.webserve.web.bean.user">
+        INSERT INTO user (username, password) values (#{username}, #{password})
+    </insert>
+
+    <select id="getUserByUsername" resultType="com.webserve.web.bean.user">
+        select * from user where username=#{username}
+    </select>
+
+
 </mapper>

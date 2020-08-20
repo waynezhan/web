@@ -7,6 +7,16 @@ public class user implements Serializable {
     private String username;
     private String password;
     private String equipId;
+    private String salt;
+
+
+    public String getSalt() {
+        return "10000a2";
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
 
     public Integer getUserid() {
         return userid;

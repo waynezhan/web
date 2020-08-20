@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.User;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
+import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.slf4j.Logger;
@@ -24,16 +25,23 @@ public class AccountRealm extends AuthorizingRealm {
     @Autowired
     JwtUtils jwtUtils;
 
+    @Autowired
+    userController userController;
+
+
 
     @Override
     public boolean supports(AuthenticationToken token) {
-        return token instanceof UsernamePasswordToken;
+        return token instanceof JwtToken;
     }
 
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
         log.info("进入doGetAuthorizationInfo");
 
+        SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
+
+        info.addStringPermission("user:getUser");
         return null;
     }
 
@@ -44,18 +52,32 @@ public class AccountRealm extends AuthorizingRealm {
         log.info("进入doGetAuthenticationInfo");
         System.out.println("进入验证方法");
 
-        String name = "zhang";
-        String password = "23312";
-        UsernamePasswordToken userToken = (UsernamePasswordToken) authenticationToken;
 
-        if (!userToken.getUsername().equals(name)){
-            return null;
+        String token = (String) authenticationToken.getCredentials();
+
+        user user = userController.getUserByUsername(JwtUtils.getUsername(token));
+
+        String username =JwtUtils.getUsername(token);
+
+        System.out.println("username token"+JwtUtils.getUsername(token));
+
+
+        if (user==null){
+            throw new AccountException("账号不存在!");
+        }if(JwtUtils.isExpire(token)){
+            throw new AuthenticationException(" token过期，请重新登入！");
         }
 
-        return  new SimpleAuthenticationInfo("",password,"");
+        if (! JwtUtils.verify(token, username, user.getPassword())) {
+            throw new CredentialsException("密码错误!");
+        }
 
-//
-//        Subject subject = SecurityUtils.getSubject();
+//        if(userBean.getStatus()==0){
+//            throw new LockedAccountException("账号已被锁定!");
+//        }
+
+        return  new SimpleAuthenticationInfo(user,token,getName());
+
 //
 //
 //

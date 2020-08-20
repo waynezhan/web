@@ -3,6 +3,7 @@ package com.webserve.web.common.exception;
 import com.webserve.web.common.lang.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.ShiroException;
+import org.apache.shiro.UnavailableSecurityManagerException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -49,6 +50,13 @@ public class GlobalExceptionHandler {
         log.error("运行时异常:-------------->",e);
         return Result.fail(e.getMessage());
     }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(value = UnavailableSecurityManagerException.class)
+    public Result handler(UnavailableSecurityManagerException e) throws IOException {
+        log.error("运行时异常:-------------->",e);
+        return Result.fail(e.getMessage());
+    }
+
 
 
 

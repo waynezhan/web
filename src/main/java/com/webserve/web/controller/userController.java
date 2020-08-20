@@ -2,6 +2,7 @@ package com.webserve.web.controller;
 
 import com.webserve.web.bean.user;
 import com.webserve.web.mapper.userMapper;
+import com.webserve.web.util.MD5Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +32,12 @@ public class userController {
 
     @PostMapping("/createUser")
     public void createUser(@RequestBody user user){
+        String password = user.getPassword();
+        String salt = user.getSalt();
+        password = MD5Utils.md5Encryption(password,salt);
+        user.setPassword(password);
+
+
         userMapper.createUser(user);
         System.out.println(user.getUsername());
         System.out.println(user.getPassword());

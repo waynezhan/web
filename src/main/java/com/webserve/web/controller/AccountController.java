@@ -5,7 +5,10 @@ import cn.hutool.core.map.MapUtil;
 import com.webserve.web.bean.user;
 import com.webserve.web.common.dto.LoginDto;
 import com.webserve.web.common.lang.Result;
+import com.webserve.web.service.UserService;
+import com.webserve.web.shiro.ResponseBean;
 import com.webserve.web.util.JwtUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.security.SecurityUtil;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UnknownAccountException;
@@ -23,71 +26,40 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+@Slf4j
 @RestController
 public class AccountController {
 
     @Autowired
-    private userController usercontroller;
+    private UserService userService;
+
 
     @Autowired
     JwtUtils jwtUtils;
 
     @PostMapping("/login")
-    public Result login(@Validated @RequestBody LoginDto loginDto, HttpServletResponse response, Model model) {
-
+    public ResponseBean login(@Validated @RequestBody LoginDto loginDto, HttpServletResponse response, Model model) {
 
 
         String username = loginDto.getUsername();
 
         String password = loginDto.getPassword();
 
-        user user = usercontroller.getUserByUsername(username);
+        String token = userService.login(username, password);
 
-        Subject subject = SecurityUtils.getSubject();
+        log.info(token);
+        response.setHeader("Authorization", token);
+        response.setHeader("Access-Control-Expose-Headers", "Authorization");
 
-        UsernamePasswordToken token = new UsernamePasswordToken(username,password);
-
-        try{
-            subject.login(token);
-            return null;
-        }catch (UnknownAccountException e)
-        {
-            model.addAttribute("msg","用户名错误");
-        }catch (Exception e){
-            System.out.println(e);
-        }
-
-
-
-
-
-        return  null;
-
-
-//        Assert.notNull(user, "用户不为空");
-//
-//        if (user.getPassword() != password) {
-//            return Result.fail("密码不正确");
-//        }
-//
-//        String jwt = jwtUtils.generateToken(user.getUserid());
-//
-//        response.setHeader("Authorization", jwt);
-//
-//        response.setHeader("Access-control-Expose-Header", "Authorization");
-//
-//        return Result.success(MapUtil.builder()
-//                .put("id", user.getUserid())
-//                .put("username", user.getUsername())
-//                .map());
+        return ResponseBean.success((Object)token);
 
 
     }
 
+
     @RequiresAuthentication
     @GetMapping("/logout")
-    public Result logout(){
+    public Result logout() {
         SecurityUtils.getSubject().logout();
         return Result.success(null);
     }

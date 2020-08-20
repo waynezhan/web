@@ -1,5 +1,10 @@
 package com.webserve.web.util;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -7,51 +12,82 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
 @Slf4j
 @Component
-@ConfigurationProperties(prefix = "projectjwt.jwt")
 public class JwtUtils {
-    private String secret;
-    private long expire;
-    private String header;
     /**
-     * 生成jwt token
+     * 过期时间6小时
      */
-    public String generateToken(long userId) {
-        Date nowDate = new Date();
-        //注册时间
-        Date expireDate = new Date(nowDate.getTime()+ expire *1000);
-        return Jwts.builder().setHeaderParam("typ","jwt")
-                .setSubject(userId+"")
-                .setIssuedAt(nowDate)
-                .setExpiration(expireDate)
-                .signWith(SignatureAlgorithm.ES512,secret)
-                .compact();
+    private static final long EXPIRE_TIME = 6*60*60*1000;
 
-
+    /**
+     * 校验token是否正确
+     * @param token 密钥
+     * @param secret 用户的密码
+     * @return 是否正确
+     */
+    public static boolean verify(String token, String username, String secret) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            JWTVerifier verifier = JWT.require(algorithm)
+                    .withClaim("username", username)
+                    .build();
+            DecodedJWT jwt = verifier.verify(token);
+            return true;
+        } catch (Exception exception) {
+            return false;
+        }
     }
 
-    // 获取jwt的信息
-    public Claims getClaimByToken(String token) {
+    /**
+     * 获得token中的信息无需secret解密也能获得
+     * @return token中包含的用户名
+     */
+    public static String getUsername(String token) {
         try {
-            return Jwts.parser()
-                    .setSigningKey(secret)
-                    .parseClaimsJws(token)
-                    .getBody();
-        }catch (Exception e){
-
+            DecodedJWT jwt = JWT.decode(token);
+            return jwt.getClaim("username").asString();
+        } catch (JWTDecodeException e) {
             return null;
         }
-
     }
 
     /**
-     * token是否过期
-     * @return  true：过期
+     * 生成签名,2min后过期
+     * @param username 用户名
+     * @param secret 用户的密码
+     * @return 加密的token
      */
-    public boolean isTokenExpired(Date expiration) {
-        return expiration.before(new Date());
+    public static String sign(String username, String secret) {
+        try {
+            Date date = new Date(System.currentTimeMillis() + EXPIRE_TIME);
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            // 附带username信息
+            return JWT.create()
+                    .withClaim("username", username)
+                    .withExpiresAt(date)
+                    .sign(algorithm);
+//        } catch (UnsupportedEncodingException e) {
+//            return null;
+//        }
+        }catch (Exception e)
+        {
+            System.out.println(e);
+            return null;
+        }
+    }
+
+
+    /**
+     * 判断过期
+     * @param token
+     * @return
+     */
+    public static boolean isExpire(String token){
+        DecodedJWT jwt = JWT.decode(token);
+        return System.currentTimeMillis()>jwt.getExpiresAt().getTime();
     }
 }

@@ -52,11 +52,11 @@ jpa:
 server:
   port: 8181
 projectjwt:
-#  jwt:
-#    #加密密钥
-#     secret:
-#     expire: 604800
-#     header: jwt
+  jwt:
+    #加密密钥
+     secret: f4e2e52034348f86b67cde581c0f9eb5
+     expire: 604800
+     header: token
 
 
 
